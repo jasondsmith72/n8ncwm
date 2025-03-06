@@ -1,0 +1,321 @@
+{
+  "name": "ConnectWise Manage Integration",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "url": "=https://{{$node[\"Set CW API Config\"].json[\"apiUrl\"]}}/service/tickets",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "headers": {
+            "values": [
+              {
+                "name": "Authorization",
+                "value": "=Basic {{$node[\"Set CW API Config\"].json[\"authHeader\"]}}"
+              },
+              {
+                "name": "clientId",
+                "value": "={{$node[\"Set CW API Config\"].json[\"clientId\"]}}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "queryParameters": {
+            "values": [
+              {
+                "name": "conditions",
+                "value": "={{$node[\"Workflow settings\"].json[\"ticketConditions\"]}}"
+              },
+              {
+                "name": "pageSize",
+                "value": "={{$node[\"Workflow settings\"].json[\"pageSize\"]}}"
+              }
+            ]
+          }
+        }
+      },
+      "name": "Get CW Tickets",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        780,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "apiUrl",
+              "value": "https://api-na.myconnectwise.net/v4_6_release/apis/3.0"
+            },
+            {
+              "name": "companyId",
+              "value": "yourCompanyId"
+            },
+            {
+              "name": "publicKey",
+              "value": "yourPublicKey"
+            },
+            {
+              "name": "privateKey",
+              "value": "yourPrivateKey"
+            },
+            {
+              "name": "clientId",
+              "value": "yourClientId"
+            },
+            {
+              "name": "authHeader",
+              "value": "={{ Buffer.from($node[\"Set CW API Config\"].json[\"companyId\"] + '+' + $node[\"Set CW API Config\"].json[\"publicKey\"] + ':' + $node[\"Set CW API Config\"].json[\"privateKey\"]).toString('base64') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set CW API Config",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        580,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "ticketConditions",
+              "value": "status/name=\"Open\""
+            },
+            {
+              "name": "pageSize",
+              "value": "50"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Workflow settings",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        380,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "=https://{{$node[\"Set CW API Config\"].json[\"apiUrl\"]}}/service/tickets",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonParameters": true,
+        "options": {
+          "headers": {
+            "values": [
+              {
+                "name": "Authorization",
+                "value": "=Basic {{$node[\"Set CW API Config\"].json[\"authHeader\"]}}"
+              },
+              {
+                "name": "clientId",
+                "value": "={{$node[\"Set CW API Config\"].json[\"clientId\"]}}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        "bodyParametersJson": "={\n  \"summary\": \"{{$json[\"ticketSummary\"]}}\",\n  \"board\": {\n    \"id\": {{$json[\"boardId\"]}}\n  },\n  \"company\": {\n    \"id\": {{$json[\"companyId\"]}}\n  },\n  \"priority\": {\n    \"id\": {{$json[\"priorityId\"]}}\n  },\n  \"status\": {\n    \"id\": {{$json[\"statusId\"]}}\n  },\n  \"contact\": {\n    \"id\": {{$json[\"contactId\"]}}\n  }\n}"
+      },
+      "name": "Create CW Ticket",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        780,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "ticketSummary",
+              "value": "New ticket created via n8n"
+            },
+            {
+              "name": "boardId",
+              "value": "123"
+            },
+            {
+              "name": "companyId",
+              "value": "456"
+            },
+            {
+              "name": "priorityId",
+              "value": "3"
+            },
+            {
+              "name": "statusId",
+              "value": "New"
+            },
+            {
+              "name": "contactId",
+              "value": "789"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Ticket Data",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        580,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "PUT",
+        "url": "=https://{{$node[\"Set CW API Config\"].json[\"apiUrl\"]}}/service/tickets/{{$json[\"ticketId\"]}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "jsonParameters": true,
+        "options": {
+          "headers": {
+            "values": [
+              {
+                "name": "Authorization",
+                "value": "=Basic {{$node[\"Set CW API Config\"].json[\"authHeader\"]}}"
+              },
+              {
+                "name": "clientId",
+                "value": "={{$node[\"Set CW API Config\"].json[\"clientId\"]}}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        "bodyParametersJson": "={\n  \"status\": {\n    \"id\": {{$json[\"newStatusId\"]}}\n  },\n  \"_info\": {\n    \"lastUpdated\": \"{{$json[\"lastUpdated\"]}}\"\n  }\n}"
+      },
+      "name": "Update CW Ticket",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        780,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "ticketId",
+              "value": "12345"
+            },
+            {
+              "name": "newStatusId",
+              "value": "4"
+            },
+            {
+              "name": "lastUpdated",
+              "value": "={{ $now.toISOString() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Update Data",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        580,
+        620
+      ]
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Workflow settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow settings": {
+      "main": [
+        [
+          {
+            "node": "Set CW API Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set CW API Config": {
+      "main": [
+        [
+          {
+            "node": "Get CW Tickets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Ticket Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ticket Data": {
+      "main": [
+        [
+          {
+            "node": "Create CW Ticket",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Data": {
+      "main": [
+        [
+          {
+            "node": "Update CW Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
